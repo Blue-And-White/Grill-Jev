@@ -1,8 +1,9 @@
 # Grill Jev
 
 A self-contained skill that lets a host model consult Jev at decision points while
-carrying out your task. The host gathers evidence, formulates questions, executes
-the selected next step, and brings observed results into the next decision.
+carrying out your task. Delegate task choices to Jev while your existing model
+keeps investigating, reasoning, writing, and acting. The host brings observed
+results back into the next decision.
 
 - **Choice:** select among concrete alternatives.
 - **Noul:** evaluate a yes/no proposition as a probability.
@@ -11,6 +12,25 @@ the selected next step, and brings observed results into the next decision.
 No grill-me installation is required.
 
 ## Philosophy
+
+An agent can understand a task, identify several plausible approaches, and still
+pause to ask: "I found these options. Which should I pursue?" That decision handoff
+is the starting point for Grill Jev. Within the goal and discretion the user has
+already delegated, the host can direct such questions to Jev and continue working.
+
+Jev takes the role of a decision partner at those branch points. The general
+model continues to do the reasoning that makes a choice meaningful: investigating
+the situation, developing hypotheses, generating alternatives, and understanding
+the consequences. It also writes the code or other output, operates tools, and
+checks the result. The skill makes this division of work explicit inside an
+existing agent.
+
+The aim is to reduce interruptions where the agent already has enough information
+to frame a bounded choice. Jev can choose within the user's stated preferences
+and delegated discretion. It cannot supply an unknown personal preference or
+grant new permission; those decisions still require the user. Calling it a
+decision partner describes a workflow role, not a claim that it knows what the
+user would think or always makes a better choice.
 
 An open-ended task becomes a sequence of smaller decisions as evidence arrives.
 Grill Jev uses a general-purpose model to discover those decisions and express
@@ -23,14 +43,12 @@ The division of work is deliberate:
 | Component | Responsibility |
 | --- | --- |
 | Host model | Understand the task, investigate, generate viable alternatives, formulate questions, interpret answers, and verify outcomes |
-| Jev | Evaluate the supplied state through Choice, Noul, and Score questions |
+| Jev | Resolve delegated decision questions through Choice, Noul, and Score |
 | Existing tools | Carry out the host's actions: read sources, browse, write files, or run code within the task's permissions |
 
 The question set evolves with the task. You do not need to enumerate every
-possible action at the start. For example, when two research reports disagree,
-the host can first ask which evidence to inspect, then use the new evidence to
-ask whether the reports measure the same thing. Each round makes the next
-decision more concrete.
+possible action at the start. The host turns the current uncertainty into
+questions, then revises the remaining questions as evidence arrives.
 
 The questioning method borrows four ideas from grill-me: investigate facts
 before asking, expose assumptions, settle prerequisite decisions first, and
@@ -78,6 +96,42 @@ internal reasoning between models. Its continuity comes from shared facts,
 constraints, previous decisions, and observed outcomes. That makes the handoff
 inspectable, but its quality depends on what the host includes or leaves out.
 
+### Multiple rounds with feedback
+
+A round carries a decision through to an observable outcome. Before acting, the
+host identifies what the selected step is expected to accomplish or clarify.
+After acting, it compares that expectation with the actual result and updates
+the next request. A failed action may reveal a bad assumption, missing evidence,
+poor options, or an execution problem; the next question should address the
+identified issue rather than simply ask Jev to choose again.
+
+For example, suppose the user asks the agent to explain conflicting figures in
+two research reports:
+
+| Round | Host prepares | Jev decides | Host acts and feeds back |
+| --- | --- | --- | --- |
+| 1 | Known figures, uncertainties, and concrete sources to inspect | Which source is most relevant to clarifying the metric definition? | Reads the selected methodology section; records that it omits the definition |
+| 2 | The failed lookup, remaining uncertainty, and newly discovered source candidates | Which candidate source best addresses the missing definition? | Reads the glossary and obtains the definition |
+| 3 | Both definitions and their supporting excerpts | Do the supplied definitions describe the same metric? | Checks the answer against the excerpts and writes the supported explanation |
+
+This is an illustrative workflow, not a live Jev result. Round 2 exists because
+the action changed the evidence and available options. Independent questions
+answerable from the same evidence can be sent together, including questions
+whose answers are useful only on a particular branch. A later round is needed
+when new evidence or an earlier answer is required to construct its questions.
+
+The host maintains the loop under the skill's instructions; the Python helper
+performs one API request per invocation. Feedback updates the next request's
+state and question design. It does not train Jev, transfer hidden reasoning, or
+create a persistent Jev conversation. Stop when the task's completion criteria
+are verified, or when further rounds have no useful evidence to obtain within
+the task's budget.
+
+This design draws on TypeSafe's guidance on
+[question dependencies](https://docs.typesafe.ai/primitives#when-one-question-depends-on-another)
+and its [feedback-driven question discovery example](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery).
+Grill Jev applies those ideas to decisions during the host's current task.
+
 ### What we want to learn
 
 The most useful decision points have concrete alternatives or a clear rubric:
@@ -89,9 +143,10 @@ choose poorly; adding another model does not remove that limitation.
 This project is an experiment in that collaboration. Compare it with the same
 host working alone, and with a cheaper structured-output model making the same
 decisions. Measure completed-task quality, total elapsed time, total model cost,
-and unnecessary actions. Include the host's question-writing and interpretation
-overhead. So far, the helper has been validated offline; this project has not
-established live Jev decision quality or an end-to-end performance advantage.
+unnecessary actions, and avoidable requests for user decisions. Include the
+host's question-writing and interpretation overhead. So far, the helper has been
+validated offline; this project has not established live Jev decision quality
+or an end-to-end performance advantage.
 
 ## Installation
 

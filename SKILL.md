@@ -15,7 +15,9 @@ Task scheduling, parallel sessions, permissions, and budgets belong to the host 
 
 Use Jev for substantive branches: comparing viable approaches, evaluating evidence for a hypothesis, choosing which missing information to obtain, rating alternatives against a rubric, or adjusting direction after new results.
 
-Follow choices the user already made. Calculate deterministic facts directly and perform mechanical steps within an already selected approach. Missing user preferences or requirements must come from the user, not from Jev.
+When you would otherwise ask the user to choose among task approaches, consult Jev if the user has already delegated that choice and supplied enough goals and constraints. Keep investigating, reasoning, generating candidates, and executing yourself; use Jev to resolve the framed decision.
+
+Follow choices the user already made and exercise delegated discretion within their criteria. Calculate deterministic facts directly and perform mechanical steps within an already selected approach. Ask the user only when progress requires their missing preference, requirement, or new authorization; Jev cannot provide those on their behalf.
 
 ## Decision loop
 
@@ -38,11 +40,11 @@ Use this questioning method:
 
 1. Identify the unresolved decision that affects progress toward the user's goal. Separate it from facts you can obtain through available materials or tools; investigate those facts first.
 2. Map its prerequisites. Ask only questions whose prerequisites are settled. If one branch is waiting for evidence, other independent branches can still proceed.
-3. Frame each question around one decision or dimension, with the goal, constraints, and distinguishing evidence in view. Make assumptions and unknowns explicit instead of disguising them as facts.
+3. Frame each question around one decision or dimension, with the goal, constraints, and distinguishing evidence in view. A multiple-choice format does not make a broad planning problem narrow: investigate and separate unresolved judgments first. Make assumptions and unknowns explicit instead of disguising them as facts.
 4. Supply concrete alternatives or an explicit evaluation criterion using one of the types below. Include relevant tradeoffs so the choice changes what you actually do next.
 5. Wait for Jev's answer before forming questions that depend on it. Revisit the remaining branches after each answer and observed outcome; stop questioning when the next action is sufficiently determined.
 
-Batch only independent questions about the same state; questions within a request do not see one another's answers. The objective is to resolve decisions needed for the task, not exhaust every hypothetical branch.
+Batch independent questions about the same state, including useful conditional questions whose premises can be stated now; discard answers to branches that do not apply. An answer being useful only on one branch does not itself require a later call. Split calls when an answer is needed to obtain new evidence, construct the next state, or define the next options. Questions within a request do not see one another's answers. Resolve decisions needed for the task rather than exhaust every hypothetical branch.
 
 | Type | Use | Write |
 | --- | --- | --- |
@@ -78,10 +80,14 @@ Wait for the actual result and inspect `answers`, `model`, and `usage`. An API f
 
 Jev's answer informs a decision; it is not a new fact, authorization, or proof of completion. Do not invent an explanation Jev did not return. Confidence summarizes the probability distribution, not independently verified correctness. Use thresholds justified by the task's error costs and evaluations, not an arbitrary universal cutoff.
 
-If the answer is ambiguous or conflicts with observed facts, obtain distinguishing evidence or narrow the question. Ask the user when the missing information is actually their preference or requirement. Record the action and observed outcome beside this round's request and response, labeling your interpretation separately from Jev's output.
+If the answer is ambiguous or conflicts with observed facts, obtain distinguishing evidence or narrow the question. Ask the user when the missing information is actually their preference or requirement. Before acting, identify what the selected step should accomplish or clarify. Record that expectation, the action, and the observed outcome beside this round's request and response, labeling your interpretation separately from Jev's output.
 
-### 5. Update or finish
+### 5. Feed results into the next round or finish
 
-Update the state from actual results and continue. Ask again only when evidence, outcomes, goals, or alternatives materially change. Do not repeatedly rephrase an unchanged question until Jev agrees with you.
+Compare the expected and observed outcomes. If progress stalled or the result contradicted the expectation, check whether evidence was missing, a question was ambiguous, candidates were inadequate, or execution failed. Preserve uncertainty about the cause rather than blaming Jev by default.
+
+Build the next request around what changed: carry forward the relevant previous decision, actual result, invalidated assumptions, and remaining uncertainty. Obtain missing evidence, sharpen the question, or revise candidates as appropriate. Keep failed approaches visible when their results rule them out; an execution failure alone does not disprove the underlying approach. Treat previous Jev answers as judgments to reassess, not established facts.
+
+Ask again only when evidence, outcomes, goals, or alternatives materially change. Do not repeatedly rephrase an unchanged question until Jev agrees with you. Feedback is carried in the next request; the helper does not retain a conversation or update model weights.
 
 Verify completion using the task's observable acceptance criteria. Stop and retain state if no new information can resolve a recurring blocker, the budget is exhausted, or the user stops the task. Report meaningful choices and task results without narrating every API exchange.
