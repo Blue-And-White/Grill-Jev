@@ -1,0 +1,3 @@
+interface:
+  display_name: "Grill Jev"
+  short_description: "Consult Jev through typed questions, then act and reassess"
