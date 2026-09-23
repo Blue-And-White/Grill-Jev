@@ -236,5 +236,10 @@ under MIT. No separate installation of those skills is required.
 
 See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the source revision,
 copyright, and license text. Retain that notice when redistributing the adapted
-material. It covers the upstream portions and does not assign a license to
-unrelated original files.
+material.
+
+## License
+
+Grill Jev is licensed under the [MIT License](LICENSE). Third-party portions
+retain their original copyright notices in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
