@@ -15,9 +15,13 @@ The wire request has `model`, `state`, and `questions`. The helper's input file 
 
 The outer schema is fixed, but `state`, question IDs, and criteria are task-defined. State accepts text, an object, or an array. Instructions and rubric descriptions accept text, objects, or arrays. Choice descriptions may be null when their names are sufficient.
 
+Use [patterns.md](patterns.md) for complete structured requests and examples of batching, suitability checks, ranking, extraction, and verification. These use the same endpoint and helper; they do not require a fixed question template or one request per question. Shared evidence belongs in `state`; candidate-specific supporting data can also live in a structured question's `instructions`.
+
 **Streaming:** the documented endpoint returns one complete JSON result. The public API and inspected official Python SDK expose no answer-streaming/SSE contract or `stream` option. Async SDK calls mean asynchronous request handling, not streamed answers. This helper validates a complete result.
 
 **History:** the documented request has no conversation/session ID or previous-response continuation field. Treat each call as an independent evaluation. Reusing a key, HTTP client, local folder, or question ID does not supply prior context. The host must put relevant prior answers and actual outcomes into each new `state`. This describes the inference interface, not provider data retention or internal caching.
+
+Streaming and memory are independent features: a streaming transport would not itself preserve history. The host can retain records in files, a database, or its existing task context, then select relevant material for each request. This skill uses local round files for inspectability. An async SDK or concurrent helper processes can overlap independent requests, but neither creates conversation memory.
 
 Questions in the same call see the same state and are evaluated independently. Batch independent questions; send dependent follow-ups in later requests with prerequisite results explicitly included.
 
@@ -30,6 +34,8 @@ Questions in the same call see the same state and are evaluated independently. B
 | `score` | Ordered array of level descriptions | `type`, `score`, `legend`, `probabilities`, `confidence` |
 
 The helper requires nonempty instructions, 1–255 Choice options, and 2–10 Score levels. The official SDK schema permits a one-level Score, but documentation recommends at least two and this helper enforces that useful rubric boundary. Structured descriptions, null Choice descriptions, and optional Noul descriptions are supported.
+
+These are helper authoring constraints, not a complete copy of the SDK schema. The advanced guide permits null instructions and null Score entries; the HTTP reference and Python Score schema describe non-null levels. The helper keeps explicit instructions and described Score levels, which work across these documented forms. Structured objects and arrays do not need to be converted to strings.
 
 Noul values near 0.5 express uncertainty; there is no separate confidence field. Score uses zero-based levels: three criteria produce a score from 0 to 2, possibly fractional. It is the probability-weighted mean of the level indexes. For example, probabilities `[0.1, 0.6, 0.3]` imply a score of `1.2`. Confidence summarizes concentration, not independently verified accuracy.
 
@@ -108,6 +114,12 @@ The helper validates types, option/level IDs, numeric ranges, distributions, Sco
 For the next round, read the saved answer, perform the selected work, and prepare a new state containing relevant evidence and outcomes. The helper does not automatically replay old files. Local records are not server-side conversation handles.
 
 Preserve the actual model name in each response for comparative experiments.
+
+## Request size and transport choices
+
+The [model limits](https://docs.typesafe.ai/models) checked on 2026-09-23 are 64k tokens for the full request, with an additional 32k limit for state plus the longest question. The helper does not estimate model tokens or truncate inputs. Retrieve relevant excerpts and split batches before hitting these limits; character count is not an exact token count.
+
+The current helper calls the official TypeSafe endpoint. It is not a wrapper around the SDK and does not read the SDK's `TYPESAFE_BASE_URL`. The official [Python SDK](https://docs.typesafe.ai/sdk/python/api/clients/async) provides asynchronous calls, connection reuse, and configurable retries for a sustained application workload. Those features do not change how questions should be framed. The dependency-free helper remains sufficient for individual agent decision rounds.
 
 ## Sources checked
 

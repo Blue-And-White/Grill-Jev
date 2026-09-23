@@ -54,9 +54,13 @@ Batch independent questions about the same state, including useful conditional q
 
 All three use the same script and request envelope: `{"state": ..., "questions": {"question_id": ...}}`. Set each question's `type` to `choice`, `noul`, or `score`; these are question types, not separate conversational models. Use the complete examples in [references/api.md](references/api.md) when constructing the first request.
 
+Choose the question shape for the decision; a round need not contain all three types or a single "what next?" Choice. Read the relevant example in [references/patterns.md](references/patterns.md) when you need structured option boundaries, conditional batching, selection plus suitability, multiple scoring dimensions, shortlist or tree traversal, source-span extraction, or draft verification. These patterns compose; they are not a fixed sequence.
+
 Do not embed your preferred answer or leading labels in the question. If the alternatives might be inadequate, include an actionable option to gather evidence or reframe the candidates. You must generate new alternatives after that option is selected.
 
 Put the actual question in `instructions` and option or level meanings in `criteria`. Question IDs are routing keys, not instructions. Generate candidates from the current task instead of imposing a fixed domain menu. Describe each Score level independently; do not use bare numbers or "better than the previous level."
+
+Use objects or arrays for instructions and criteria when named fields clarify evidence or boundaries. Reference the relevant state field directly, such as `observations.reader_report`; do not flatten useful structure into a long prose prompt. Keep arithmetic, date comparisons, and hard constraints in host code.
 
 ### 3. Call the API helper
 
@@ -75,6 +79,7 @@ Wait for the actual result and inspect `answers`, `model`, and `usage`. An API f
 ### 4. Interpret, act, and observe
 
 - **Choice:** map the returned ID to the full option you defined, then perform the corresponding next step.
+- **Suitability:** a Choice winner is relative to its alternatives. When all candidates could be inadequate, also check absolute suitability or retain an actionable "none fits" option before proceeding.
 - **Noul:** retain its probability of yes. A value near the middle expresses uncertainty, not partial task completion.
 - **Score:** interpret the score on the supplied `0..N-1` scale alongside its distribution and legend. A fractional score is a weighted position, not a percentage or success probability. Keep rubrics comparable when ranking alternatives; any weights across dimensions belong to the task specification.
 

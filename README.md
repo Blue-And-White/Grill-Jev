@@ -144,9 +144,32 @@ This project is an experiment in that collaboration. Compare it with the same
 host working alone, and with a cheaper structured-output model making the same
 decisions. Measure completed-task quality, total elapsed time, total model cost,
 unnecessary actions, and avoidable requests for user decisions. Include the
-host's question-writing and interpretation overhead. So far, the helper has been
-validated offline; this project has not established live Jev decision quality
-or an end-to-end performance advantage.
+host's question-writing and interpretation overhead. On 2026-09-23, a small
+synthetic Codex task completed two live Jev rounds with a source lookup and
+observed feedback between them. A separate live request verified structured
+instructions and criteria for all three question types. These checks establish
+connectivity and the handoff mechanism, not general decision quality or an
+end-to-end performance advantage.
+
+### Flexible questions, a small transport layer
+
+The helper fixes authentication and the API envelope. The host chooses what to
+ask, what evidence to include, and how many relevant questions to batch. A round
+can contain one Noul, several Scores, or a mixed set; it need not always ask
+"which action next?" or use all three types.
+
+The [pattern guide](references/patterns.md) gives examples of structured option
+boundaries, conditional batching, selection with a suitability check, scoring
+separate dimensions, narrowing a catalog or hierarchy, selecting source spans,
+checking generated work, and revising questions from observed outcomes. These
+are building blocks to adapt to the task, rather than a preset task workflow.
+
+TypeSafe's [building guide](https://docs.typesafe.ai/concepts/how-to-build-with-system-one)
+emphasizes narrow judgments inside software whose code controls the workflow.
+Grill Jev applies those question-design principles inside an existing agent:
+the host discovers decision points as the task develops. The API helper does
+not determine that workflow, and a skill instruction alone is not a hard runtime
+guarantee that the host will consult Jev correctly at every branch.
 
 ## Installation
 
@@ -209,11 +232,36 @@ by the service.
 The host includes relevant history explicitly in each request. The helper does
 not maintain server-side conversation state or execute returned choices itself.
 
+Streaming is about receiving an answer incrementally; memory is about which
+past information the next request can access. One does not imply the other.
+The documented TypeSafe API returns complete JSON and exposes no session
+continuation field. Its asynchronous SDK can overlap requests but still returns
+a complete result. History can be managed by the host in files, a database, or
+its own task context; only the material included in a request reaches Jev.
+
+## Official API and OpenRouter
+
+As checked on 2026-09-23, both [TypeSafe](https://docs.typesafe.ai/models) and
+[OpenRouter's Jev listing](https://openrouter.ai/typesafe/jev-1.13) show $0.042
+per million input tokens and free output tokens. OpenRouter separately lists a
+5.5% Standard platform fee on its [pricing page](https://openrouter.ai/pricing);
+its [FAQ](https://openrouter.ai/docs/faq) describes fees when purchasing credits.
+Equal model rates do not establish equal final payment costs. Check the current
+checkout terms for minimum fees, taxes, and payment-method differences.
+
+OpenRouter offers a [TypeSafe-compatible endpoint](https://openrouter.ai/docs/guides/community/typesafe-sdk)
+at `https://openrouter.ai/api/v1/systemone`, using an OpenRouter key and billing
+the OpenRouter account. This helper currently calls the official TypeSafe
+endpoint only; changing its API key alone does not switch providers. A gateway
+integration would require an explicit endpoint and credential change. Existing
+official credentials and credits remain configured for direct TypeSafe calls.
+
 ## Files
 
 - `SKILL.md`: instructions for the model's decision and execution loop.
 - `scripts/ask_jev.py`: shared API helper for all three question types.
 - `references/api.md`: request/response schemas and examples for the model.
+- `references/patterns.md`: task-dependent question patterns with runnable request examples.
 - `THIRD-PARTY-NOTICES.md`: upstream attribution and license notice.
 
 ## Attribution
