@@ -50,11 +50,23 @@ Batch independent questions about the same state, including useful conditional q
 | --- | --- | --- |
 | `choice` | Pick from viable alternatives | Distinct option IDs and fair descriptions of prerequisites, expected information or outcome, and material cost |
 | `noul` | Evaluate a yes/no proposition | One precise proposition; optionally define what true and false mean |
-| `score` | Rate one dimension on an ordered rubric | 2–10 concrete level descriptions, ordered low to high; indexes start at zero |
+| `score` | Rate one dimension on an ordered rubric | 2–10 concrete level descriptions; state the dimension and direction; indexes start at zero |
 
 All three use the same script and request envelope: `{"state": ..., "questions": {"question_id": ...}}`. Set each question's `type` to `choice`, `noul`, or `score`; these are question types, not separate conversational models. Use the complete examples in [references/api.md](references/api.md) when constructing the first request.
 
-Choose the question shape for the decision; a round need not contain all three types or a single "what next?" Choice. Read the relevant example in [references/patterns.md](references/patterns.md) when you need structured option boundaries, conditional batching, selection plus suitability, multiple scoring dimensions, shortlist or tree traversal, source-span extraction, or draft verification. These patterns compose; they are not a fixed sequence.
+Choose a question pattern from the current decision's structure. Reconsider it when the evidence or candidate set changes; do not keep using a single "what next?" Choice by habit.
+
+| Decision structure | Useful approach |
+| --- | --- |
+| One clear judgment | A single Choice, Noul, or Score; extra questions are unnecessary |
+| Several judgments share evidence | Batch independent and explicitly conditional questions, then use the relevant answers |
+| The best candidate might still be unsuitable | Selection plus a separate suitability judgment or a "none fits" outcome |
+| Several competing dimensions matter | Score dimensions separately; apply task-specific constraints and combine results locally |
+| Too many candidates or an existing hierarchy | Shortlist and inspect more detail, or traverse branches while retaining useful alternatives |
+| A source span or generated result needs checking | Select from extracted spans, or evaluate specific claims against original evidence |
+| An action changes what is known | Update state and construct new questions or candidates from its observed result |
+
+Read the relevant section of [references/patterns.md](references/patterns.md) when applying an unfamiliar pattern. Its examples are a starting point, not an exhaustive menu. Adapt and combine them, generate task-specific questions and candidates, and use other compositions supported by the API when they fit better. A round need not contain all three types, and using an advanced pattern is not a goal in itself.
 
 Do not embed your preferred answer or leading labels in the question. If the alternatives might be inadequate, include an actionable option to gather evidence or reframe the candidates. You must generate new alternatives after that option is selected.
 
@@ -64,7 +76,7 @@ Use objects or arrays for instructions and criteria when named fields clarify ev
 
 ### 3. Call the API helper
 
-Store each request under the working directory's `work/grill-jev/<session-id>/`, using successive round names such as `001.request.json`. Use a distinct directory for each concurrent session. Save JSON with a file-writing tool; do not interpolate task text or credentials into shell commands.
+Save each round's request and response in the task's working files. A default layout is `work/grill-jev/<session-id>/001.request.json` with corresponding response files; an existing task logging layout is also suitable. Keep concurrent sessions' records distinct and preserve earlier rounds. Save JSON with a file-writing tool; do not interpolate task text or credentials into shell commands.
 
 ```text
 python3 <skill-directory>/scripts/ask_jev.py <request-file> --output <response-file>

@@ -17,6 +17,8 @@ The outer schema is fixed, but `state`, question IDs, and criteria are task-defi
 
 Use [patterns.md](patterns.md) for complete structured requests and examples of batching, suitability checks, ranking, extraction, and verification. These use the same endpoint and helper; they do not require a fixed question template or one request per question. Shared evidence belongs in `state`; candidate-specific supporting data can also live in a structured question's `instructions`.
 
+The helper does not prescribe question counts, task-specific state fields, candidate IDs, decision thresholds, scoring weights, or the number of rounds. It preserves structured inputs and returns the full validated response, including probability distributions. The host can use those distributions for shortlists or branch exploration, compute rankings, and construct a different question set on the next call. These compositions are host logic, not additional API modes or strategies executed by the helper.
+
 **Streaming:** the documented endpoint returns one complete JSON result. The public API and inspected official Python SDK expose no answer-streaming/SSE contract or `stream` option. Async SDK calls mean asynchronous request handling, not streamed answers. This helper validates a complete result.
 
 **History:** the documented request has no conversation/session ID or previous-response continuation field. Treat each call as an independent evaluation. Reusing a key, HTTP client, local folder, or question ID does not supply prior context. The host must put relevant prior answers and actual outcomes into each new `state`. This describes the inference interface, not provider data retention or internal caching.
