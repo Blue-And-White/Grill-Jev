@@ -12,27 +12,45 @@ or checking generated work. No separate grill-me installation is required.
 
 ## Philosophy
 
-An agent often reaches a point where it has gathered evidence and identified
-several plausible approaches, but pauses to ask: "Which direction should I take?"
-When the user has already delegated that choice, Jev can be the decision partner
-the agent consults to keep moving.
+Grill Jev began with curiosity about where Jev could be useful. In its current
+form, Jev exposes classification and decision primitives, with speed and low
+inference cost central to its appeal. Official examples include
+[intent routing](https://docs.typesafe.ai/patterns/intent-routing), as well as
+retrieval re-ranking, content classification, citation checking, and verification
+of extracted data in the [cookbooks](https://docs.typesafe.ai/cookbooks).
+These illustrate decisions over supplied evidence with explicit answer formats.
+They prompted a broader question: how might that decision capability fit into
+the work of a general-purpose LLM that can reason, investigate, and act?
 
-The host model still does the thinking that makes a decision meaningful. It
-understands the goal, explores the situation, develops hypotheses, finds viable
-alternatives, and explains the result. Jev evaluates the bounded questions the
-host prepares. The host then executes the selected work and checks what happened.
+The practical inspiration came from using grill-me. Its questions expose
+assumptions and alternatives, often asking the user to choose a direction before
+the agent proceeds. That suggested a possible bridge: when an LLM reaches a
+decision the user has delegated, it could use a similar questioning discipline
+to frame the situation, articulate the options, and ask Jev for a decision.
 
-The questioning method adapts the spirit of grill-me: investigate before asking,
-surface assumptions, settle prerequisites, and use each answer to sharpen the
-next question. Here, those questions go to Jev as part of completing a task.
-You do not need to enumerate the entire decision tree in advance; the host
-discovers new decisions as evidence arrives.
+Grill Jev explores that division of work at the application level. The host LLM
+understands the task, gathers evidence, develops hypotheses, and constructs
+meaningful questions. Jev evaluates those questions through Choice, Noul, or
+Score. The host interprets the result and performs the work. In this arrangement,
+Jev serves as a decision layer within the existing agent, while the general
+model supplies the reasoning and execution that make its decisions actionable.
+The questions and available options evolve with the task; they do not have to
+be fixed in advance.
 
-This division of work makes Jev easy to try inside an agent you already use.
-Its typed decisions and probability distributions give the host something
-concrete to act on and reassess. The useful question is whether this cooperation
-helps complete your task; adding a decision model does not automatically make
-the agent better.
+The feedback loop matters as much as the handoff. After receiving a decision,
+the host identifies what the selected action should accomplish, executes it,
+and compares the expected outcome with what actually happened. It carries
+relevant results into the next question and revises assumptions or candidates
+when necessary. A decision is therefore something to test through action,
+rather than an answer that ends the investigation.
+
+The aim is a lightweight way to try this idea inside an agent people already
+use, with little integration work. It makes it possible to examine Jev's
+contribution to task decisions without building a new agent framework first.
+Whether that contribution improves results, saves effort, or merely adds
+another handoff remains an empirical question. Fast individual decisions do
+not guarantee a better overall workflow; the quality of the host's questions
+and the cost of preparing and acting on them matter too.
 
 User intent remains the foundation. Jev chooses within the goals, constraints,
 and discretion you supply. Missing personal preferences and new permissions
