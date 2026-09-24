@@ -5,7 +5,7 @@ description: "Use Jev-assisted decision making while carrying out a user task. T
 
 # Grill Jev
 
-You own the user's task: observe, propose options, execute, and verify. At a consequential decision point, frame typed questions for Jev, call the bundled helper, and use its answers to continue. Repeat until complete, genuinely blocked, or stopped by the user.
+You own the user's task: observe, propose options, execute, and verify. For each new unresolved judgment within the user-delegated scope, frame typed questions for Jev, call the bundled helper, and use its answers to continue. Repeat until complete, genuinely blocked, or stopped by the user.
 
 This skill contains the full questioning method and API helper. No other skill is required. Once loaded, apply this loop at each new substantive decision during the task; there is no need to reload the skill for every question.
 
@@ -13,11 +13,11 @@ Task scheduling, parallel sessions, permissions, and budgets belong to the host 
 
 ## When to consult
 
-Use Jev for substantive branches: comparing viable approaches, evaluating evidence for a hypothesis, choosing which missing information to obtain, rating alternatives against a rubric, or adjusting direction after new results.
+Consult Jev when progress requires a new judgment within the delegated scope: interpreting evidence, comparing approaches, choosing which information to obtain, accepting or excluding a candidate, revising direction, or assessing whether evidence meets a qualitative completion criterion. Excluding a candidate and deciding to stop are decisions too. Do not reserve Jev for major milestones or for moments when you feel uncertain; host confidence alone is not a reason to skip a delegated judgment.
 
-When you would otherwise ask the user to choose among task approaches, consult Jev if the user has already delegated that choice and supplied enough goals and constraints. Keep investigating, reasoning, generating candidates, and executing yourself; use Jev to resolve the framed decision.
+Distinguish choosing an action from executing it. Selecting which of several relevant documents to inspect may require Jev; reading the already selected document does not. Interpreting whether its contents change the conclusion is a new judgment. Keep investigating, reasoning, generating candidates, and executing yourself; Jev evaluates the questions you frame.
 
-Follow choices the user already made and exercise delegated discretion within their criteria. Calculate deterministic facts directly and perform mechanical steps within an already selected approach. Ask the user only when progress requires their missing preference, requirement, or new authorization; Jev cannot provide those on their behalf.
+Follow choices the user already made, calculate deterministic facts directly, and execute steps settled by an existing decision without asking again. Tool use itself is neither a trigger nor an exemption. Consult Jev when you would otherwise ask the user for an approach choice they have already delegated; ask the user when their preference, requirement, or new authorization is missing. Jev cannot supply those on their behalf. Respect task scope and call or time limits; exhausting a limit does not silently transfer delegated judgments back to the host.
 
 ## Decision loop
 
@@ -26,7 +26,7 @@ Follow choices the user already made and exercise delegated discretion within th
 Keep your existing task context. Prepare a compact `state` containing:
 
 - The user's goal, completion criteria, and relevant constraints.
-- Observed facts and source excerpts or tool results needed to assess them. Label hypotheses separately.
+- Relevant observations and short source excerpts or tool results, separate from candidate explanations. Include supporting and conflicting evidence, unsettled assumptions, and gaps that could change the judgment; do not send only your preferred conclusion or silently remove plausible alternatives through an unexamined assumption.
 - Relevant earlier questions, Jev answers, actions actually taken, and observed outcomes.
 - Current unknowns and remaining time or budget when they affect this decision.
 
@@ -68,7 +68,9 @@ Choose a question pattern from the current decision's structure. Reconsider it w
 
 Read the relevant section of [references/patterns.md](references/patterns.md) when applying an unfamiliar pattern. Its examples are a starting point, not an exhaustive menu. Adapt and combine them, generate task-specific questions and candidates, and use other compositions supported by the API when they fit better. A round need not contain all three types, and using an advanced pattern is not a goal in itself.
 
-Do not embed your preferred answer or leading labels in the question. If the alternatives might be inadequate, include an actionable option to gather evidence or reframe the candidates. You must generate new alternatives after that option is selected.
+Do not embed your preferred answer or leading labels in the question. If the alternatives might be inadequate, include an actionable option to gather evidence or reframe the candidates. After that option is selected, investigate and construct revised alternatives yourself; Jev cannot generate the missing options.
+
+Bound coverage questions to supplied material and explicit criteria. For example, ask whether the proposed report outline addresses the requirements quoted in state, rather than asking whether anything has been missed anywhere. A negative or uncertain assessment calls for host inspection and revised candidates, not an invented explanation from Jev. A positive assessment cannot establish coverage of unseen material. Use this check when coverage affects the decision, not as a mandatory extra question in every call.
 
 Put the actual question in `instructions` and option or level meanings in `criteria`. Question IDs are routing keys, not instructions. Generate candidates from the current task instead of imposing a fixed domain menu. Describe each Score level independently; do not use bare numbers or "better than the previous level."
 
@@ -97,14 +99,22 @@ Wait for the actual result and inspect `answers`, `model`, and `usage`. An API f
 
 Jev's answer informs a decision; it is not a new fact, authorization, or proof of completion. Do not invent an explanation Jev did not return. Confidence summarizes the probability distribution, not independently verified correctness. Use thresholds justified by the task's error costs and evaluations, not an arbitrary universal cutoff.
 
-If the answer is ambiguous or conflicts with observed facts, obtain distinguishing evidence or narrow the question. Ask the user when the missing information is actually their preference or requirement. Before acting, identify what the selected step should accomplish or clarify. Record that expectation, the action, and the observed outcome beside this round's request and response, labeling your interpretation separately from Jev's output.
+If the answer is ambiguous or conflicts with observed facts or task constraints, pause that action, obtain distinguishing evidence or narrow the question. Record why the returned answer was not followed; do not silently replace it with your preferred option. Ask the user when the missing information is actually their preference or requirement. Before acting, identify what the selected step should accomplish or clarify. Record that expectation, the action, and the observed outcome beside this round's request and response, labeling your interpretation separately from Jev's output.
 
 ### 5. Feed results into the next round or finish
+
+After each selected action or coherent execution step, check whether its result creates a new unresolved judgment. If so, update state and consult Jev before resolving it; otherwise continue the settled steps. This check is required, but another API call is not required when no new judgment exists.
 
 Compare the expected and observed outcomes. If progress stalled or the result contradicted the expectation, check whether evidence was missing, a question was ambiguous, candidates were inadequate, or execution failed. Preserve uncertainty about the cause rather than blaming Jev by default.
 
 Build the next request around what changed: carry forward the relevant previous decision, actual result, invalidated assumptions, and remaining uncertainty. Obtain missing evidence, sharpen the question, or revise candidates as appropriate. Keep failed approaches visible when their results rule them out; an execution failure alone does not disprove the underlying approach. Treat previous Jev answers as judgments to reassess, not established facts.
 
-Ask again only when evidence, outcomes, goals, or alternatives materially change. Do not repeatedly rephrase an unchanged question until Jev agrees with you. Feedback is carried in the next request; the helper does not retain a conversation or update model weights.
+Ask a new question when a new delegated judgment arises. Reopen an already answered question only when relevant evidence, outcomes, goals, or alternatives materially change. Do not repeatedly rephrase an unchanged question until Jev agrees with you. Feedback is carried in the next request; the helper does not retain a conversation or update model weights.
 
 Verify completion using the task's observable acceptance criteria. Stop and retain state if no new information can resolve a recurring blocker, the budget is exhausted, or the user stops the task. Report meaningful choices and task results without narrating every API exchange.
+
+## Keep decisions inspectable
+
+Maintain brief decision notes alongside the round files or in the existing task log. For substantive judgments, record the question, who resolved it (Jev, host, or user), the answer or request/response reference, the resulting action, and its observed outcome. If the host resolves a judgment without Jev, state the applicable reason, such as an explicit user choice or a deterministic rule; confidence alone is not an exemption. Record any departure from Jev's answer separately from its actual output. Group routine execution steps rather than logging every tool call, and use concise reasons rather than internal reasoning transcripts.
+
+When reporting a trial, distinguish calls from questions and task outcomes from Jev's contribution. Note whether its answers changed actions and where the host made judgments independently. Call count alone does not establish compliance or usefulness, and one task result without a comparable baseline does not establish improvement.

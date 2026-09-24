@@ -205,10 +205,18 @@ You can delegate approach choices explicitly: "Choose the investigation order
 yourself; consult Jev at meaningful decision points and continue until the
 explanation is supported." Add time, call, or scope limits when they matter.
 
-The host frames the questions and calls Jev for you. It continues the work after
-each answer, gathers more evidence when needed, and verifies completion against
-your goal. Routine steps within an already chosen approach do not need another
-Jev call.
+The host consults Jev for new judgments within the scope you delegate, including
+interpreting evidence, comparing or excluding candidates, changing direction,
+and assessing qualitative completion criteria. It does not wait until it feels
+uncertain. Executing an already chosen step and calculating deterministic facts
+do not need another call.
+
+After execution, the host checks whether the result creates a new judgment and
+brings the relevant evidence into the next question. Brief decision notes show
+who made each substantive judgment and what happened afterward. This makes the
+division of work inspectable without requiring a call for every tool action.
+Jev can evaluate only the evidence and alternatives supplied to it; a coverage
+check cannot establish that unseen material contains no omissions.
 
 ### Advanced use
 
